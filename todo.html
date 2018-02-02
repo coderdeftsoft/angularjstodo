@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+</head>
+<body>
+
+	<script>
+		var app = angular.module("toDoList", []); 
+		app.controller("listCtrl", function($scope) {
+
+			var localData  = localStorage.getItem("todolist");
+			$scope.records = localData ? JSON.parse(localData) : [];
+			
+			$scope.selected = {};
+			$scope.selectedCheckboxes = [];
+			
+			$scope.addItem = function () {
+				$scope.errortext = "";
+				if (!$scope.addMe) {return;}        
+				
+				if ($scope.records && $scope.records.indexOf($scope.addMe) == -1) {
+					$scope.records.push($scope.addMe);
+					localStorage.setItem('todolist',JSON.stringify($scope.records));
+				} else {
+					$scope.errortext = "Item already in Todo list.";
+				}
+			}
+			
+			$scope.removeItem = function (x) {
+				$scope.errortext = "";    
+				$scope.records.splice(x, 1);
+				localStorage.setItem('todolist',JSON.stringify($scope.records));
+			}
+			
+			$scope.removeSelected = function() {
+				var selectedRecords = $scope.records.filter(function(i) {
+					return ($scope.selected[i])? false: true;
+				});
+				$scope.records = selectedRecords;
+				localStorage.setItem('todolist',JSON.stringify($scope.records));
+			};
+			
+			$scope.selectedAll = function() {
+				angular.forEach($scope.records, function (record) {
+					//$scope.selected[record] = !$scope.selected[record];
+					$scope.selected[record] = true;
+				});
+			}
+			  
+		});
+	</script>
+
+	<div ng-app="toDoList" ng-controller="listCtrl">
+		<ol class="todolist">
+			<li ng-repeat="record in records">
+				<input type="checkbox" ng-model="selected[record]">
+					<span class="record">{{record}}</span>
+				<span ng-click="removeItem($index)" class="removeitem">&times;</span>
+			</li>
+		</ol>
+		<input ng-model="addMe">
+		<button ng-click="addItem()">Add</button>
+	  
+		<button ng-click="removeSelected()">Remove Selected</button>
+		<button ng-click="selectedAll()">Select All</button>
+		<p>{{errortext}}</p>
+	</div>
+
+	<p>Same item only can be added once.</p>
+	<p>Storing data in Localstorage.</p>
+	
+<style>
+	ol.todolist li {
+		padding-bottom: 7px;
+	}
+	span.record {
+		min-width: 120px;
+		display: inline-block;
+	}
+	span.removeitem {
+		background: #c31111;
+		color: white;
+		border-radius: 100%;
+		height: 18px;
+		width: 18px;
+		display: inline-block;
+		text-align: center;
+		cursor: pointer;
+	}
+</style>
+
+</body>
+</html>
